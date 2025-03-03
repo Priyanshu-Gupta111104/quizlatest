@@ -1,9 +1,25 @@
 async function updateDashboard() {
     try {
         console.log("🔍 Fetching quizzes...");
-        const quizzesRes = await fetch('http://localhost:5500/api/quizzes');
         console.log("🔍 Fetching results...");
-        const resultsRes = await fetch('http://localhost:5500/api/results');
+
+        const token = sessionStorage.getItem("token"); // ✅ Get JWT token
+
+        if (!token) {
+            alert("Unauthorized: Please log in first.");
+            window.location.href = "login.html"; // ✅ Redirect to login page
+            return;
+        }
+
+        // ✅ Fetch quizzes
+        const quizzesRes = await fetch('http://localhost:5500/api/quizzes', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        // ✅ Fetch results
+        const resultsRes = await fetch('http://localhost:5500/api/results', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
 
         // ✅ Check if response is OK
         if (!quizzesRes.ok || !resultsRes.ok) {
@@ -21,14 +37,21 @@ async function updateDashboard() {
             throw new Error("Invalid API response: Expected arrays but got something else.");
         }
 
+        // ✅ Update Total Quizzes
         document.getElementById('total-quizzes').textContent = quizzes.length;
+
+        // ✅ Update Total Participants
         document.getElementById('total-participants').textContent = results.length;
 
+        // ✅ Calculate & Update Average Score
         if (results.length > 0) {
             const avgScore = Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length);
             document.getElementById('average-score').textContent = `${avgScore}%`;
+        } else {
+            document.getElementById('average-score').textContent = "0%";
         }
 
+        // ✅ Display List of Quizzes with Participants
         const quizList = document.getElementById('quiz-list');
         quizList.innerHTML = quizzes.map(quiz => {
             // ✅ Ensure `questions` exists before accessing `.length`
@@ -50,7 +73,9 @@ async function updateDashboard() {
 
     } catch (error) {
         console.error('❌ Error fetching data:', error);
+        alert("Failed to load dashboard data.");
     }
 }
 
+// ✅ Run when the page loads
 document.addEventListener('DOMContentLoaded', updateDashboard);

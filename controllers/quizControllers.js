@@ -61,7 +61,8 @@ export const submitQuiz = async (req, res) => {
 
         console.log("🔍 Received quiz submission for code:", code);
         console.log("🔍 User:", userName, "Answers:", answers);
-
+           
+        // Find the quiz by code
         const quiz = await Quiz.findOne({ quizCode: code });
 
         if (!quiz) {

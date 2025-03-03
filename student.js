@@ -127,10 +127,22 @@ document.getElementById('submit-quiz').addEventListener('click', async () => {
         return;
     }
 
+
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+        alert("Unauthorized: Please log in first.");
+        window.location.href = "login.html";
+        return;
+    }
+
     try {
         const response = await fetch(`http://localhost:5500/api/quizzes/${currentQuiz.quizCode}/submit`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+             },
             body: JSON.stringify({ userName, answers: userAnswers })
         });
 
